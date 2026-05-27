@@ -1,0 +1,224 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9"
+
+jobs:
+  # ── Type-Check ────────────────────────────────────────────────
+  typecheck:
+    name: TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type-check backend
+        run: pnpm --filter @panelshelf/backend run typecheck
+
+      - name: Type-check frontend
+        run: pnpm --filter @panelshelf/frontend run typecheck
+
+  # ── Build ─────────────────────────────────────────────────────
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [typecheck]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build backend
+        run: pnpm --filter @panelshelf/backend run build
+
+      - name: Build frontend
+        run: pnpm --filter @panelshelf/frontend run build
+
+      - name: Upload backend build
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-dist
+          path: packages/backend/dist/
+          retention-days: 5
+
+      - name: Upload frontend build
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: packages/frontend/dist/
+          retention-days: 5
+
+  # ── Docker Build ──────────────────────────────────────────────
+  docker:
+    name: Docker
+    runs-on: ubuntu-latest
+    needs: [build]
+    # Only build Docker on tag push or main branch pushes (not PRs)
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ── Release (triggered by tags) ───────────────────────────────
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download backend build
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-dist
+          path: packages/backend/dist/
+
+      - name: Download frontend build
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: packages/frontend/dist/
+
+      - name: Create release archive
+        run: |
+          # Package the built application into a distributable archive
+          mkdir -p release/panelshelf-${{ github.ref_name }}
+          
+          # Copy built artifacts
+          cp -r packages/backend/dist/ release/panelshelf-${{ github.ref_name }}/backend/
+          cp -r packages/frontend/dist/ release/panelshelf-${{ github.ref_name }}/frontend/
+          
+          # Copy deployment files
+          cp Dockerfile release/panelshelf-${{ github.ref_name }}/
+          cp docker-compose.yml release/panelshelf-${{ github.ref_name }}/
+          cp package.json release/panelshelf-${{ github.ref_name }}/
+          cp pnpm-workspace.yaml release/panelshelf-${{ github.ref_name }}/
+          cp pnpm-lock.yaml release/panelshelf-${{ github.ref_name }}/
+          cp .env.example release/panelshelf-${{ github.ref_name }}/ 2>/dev/null || true
+          
+          # Copy the README and LICENSE
+          cp README.md release/panelshelf-${{ github.ref_name }}/
+          cp LICENSE release/panelshelf-${{ github.ref_name }}/
+          
+          # Create the archive
+          cd release
+          tar czf panelshelf-${{ github.ref_name }}.tar.gz panelshelf-${{ github.ref_name }}/
+          zip -r panelshelf-${{ github.ref_name }}.zip panelshelf-${{ github.ref_name }}/
+          cd ..
+
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          cat > RELEASE_NOTES.md << 'RELEOF'
+          # PanelShelf ${{ github.ref_name }}
+
+          ## What's Included
+
+          - **Pre-built backend** — compiled JavaScript (Fastify + TypeScript)
+          - **Pre-built frontend** — static assets (React + Vite)
+          - **Dockerfile** — multi-stage production build
+          - **docker-compose.yml** — full stack with curl_cffi sidecar
+          - **Source code** — tagged at this release
+
+          ## Quick Start
+
+          ### Using Docker (recommended)
+
+          ```bash
+          docker compose up -d
+          # Open http://localhost:3001
+          ```
+
+          ### Manual Setup
+
+          ```bash
+          # Requirements: Node.js >= 20, pnpm >= 9
+          pnpm install --prod
+          pnpm run db:migrate
+          pnpm run start
+          ```
+
+          ## Changelog
+
+          See the [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details.
+          RELEOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: PanelShelf ${{ github.ref_name }}
+          body_path: RELEASE_NOTES.md
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          files: |
+            release/panelshelf-${{ github.ref_name }}.tar.gz
+            release/panelshelf-${{ github.ref_name }}.zip
