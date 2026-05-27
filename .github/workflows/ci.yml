@@ -129,7 +129,7 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [build, docker]
     if: startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: write
@@ -165,8 +165,12 @@ jobs:
           cp pnpm-lock.yaml release/panelshelf-${{ github.ref_name }}/
           cp .env.example release/panelshelf-${{ github.ref_name }}/ 2>/dev/null || true
           
-          # Copy the README and LICENSE
+          # Copy desktop config for reference
+          cp packages/desktop/src-tauri/tauri.conf.json release/panelshelf-${{ github.ref_name }}/desktop-config.json 2>/dev/null || true
+          
+          # Copy the README, LICENSE, CONTRIBUTING, and SECURITY
           cp README.md release/panelshelf-${{ github.ref_name }}/
+          cp CHANGELOG.md release/panelshelf-${{ github.ref_name }}/
           cp LICENSE release/panelshelf-${{ github.ref_name }}/
           
           # Create the archive
