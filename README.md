@@ -18,10 +18,14 @@
     <a href="#-contributing">Contributing</a>
   </p>
   <p align="center">
-    <a href="https://github.com/me-cedric/panelshelf/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License" /></a>
-    <a href="#"><img src="https://img.shields.io/badge/node-%3E%3D20-brightgreen" alt="Node >=20" /></a>
+    <a href="https://github.com/me-cedric/panelshelf/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/me-cedric/panelshelf/ci.yml?branch=main&label=CI&logo=github" alt="CI Status" /></a>
+    <a href="https://github.com/me-cedric/panelshelf/releases/latest"><img src="https://img.shields.io/github/v/release/me-cedric/panelshelf?display_name=tag&label=Release&logo=github" alt="Latest Release" /></a>
+    <a href="https://github.com/me-cedric/panelshelf/blob/main/LICENSE"><img src="https://img.shields.io/github/license/me-cedric/panelshelf?label=License" alt="MIT License" /></a>
+    <a href="#"><img src="https://img.shields.io/badge/TypeScript-95%25-3178C6?logo=typescript" alt="TypeScript" /></a>
+    <a href="#"><img src="https://img.shields.io/badge/node-%3E%3D22-brightgreen" alt="Node >=22" /></a>
     <a href="#"><img src="https://img.shields.io/badge/pnpm-workspace-purple" alt="pnpm workspace" /></a>
-    <a href="#"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome" /></a>
+    <a href="https://github.com/me-cedric/panelshelf/blob/main/CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome" /></a>
+    <a href="https://github.com/me-cedric/panelshelf/stargazers"><img src="https://img.shields.io/github/stars/me-cedric/panelshelf?style=flat&label=Stars&logo=github" alt="Stars" /></a>
     <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey" alt="Platforms" />
   </p>
   <br />
@@ -231,7 +235,7 @@ All caches can be cleared via Settings → Sources → **Clear Cache**, or `POST
 
 ### Prerequisites
 
-- **Node.js** >= 20 (LTS recommended)
+- **Node.js** >= 22 (LTS recommended)
 - **pnpm** >= 9 (install: `npm install -g pnpm`)
 - **Rust** (only for desktop app: `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`)
 

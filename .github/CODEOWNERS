@@ -1,0 +1,37 @@
+# CODEOWNERS — Default code reviewers for PanelShelf
+# Each line is a file pattern followed by one or more owners
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global default — the repo owner reviews all PRs by default
+* @me-cedric
+
+# CI/CD workflow changes
+.github/workflows/* @me-cedric
+.github/ISSUE_TEMPLATE/* @me-cedric
+.github/pull_request_template.md @me-cedric
+
+# Docker and deployment config
+Dockerfile @me-cedric
+docker-compose.yml @me-cedric
+
+# Documentation
+README.md @me-cedric
+CHANGELOG.md @me-cedric
+CONTRIBUTING.md @me-cedric
+CODE_OF_CONDUCT.md @me-cedric
+SECURITY.md @me-cedric
+RELEASE_NOTES.md @me-cedric
+
+# Root project config
+package.json @me-cedric
+pnpm-workspace.yaml @me-cedric
+tsconfig.base.json @me-cedric
+
+# Backend — core business logic
+packages/backend/src/ @me-cedric
+
+# Frontend — UI components and pages
+packages/frontend/src/ @me-cedric
+
+# Desktop app — Tauri/Rust wrapper
+packages/desktop/src-tauri/src/ @me-cedric
