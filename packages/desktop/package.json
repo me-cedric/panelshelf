@@ -1,0 +1,23 @@
+{
+  "name": "@panelshelf/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "cd ../.. && pnpm dev",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "pnpm run build:desktop-before && tauri build",
+    "build:frontend": "cd ../.. && pnpm --filter @panelshelf/frontend run build",
+    "build:backend": "node scripts/build-backend.mjs",
+    "build:desktop-before": "pnpm run build:frontend && pnpm run build:backend",
+    "icon": "node scripts/generate-icon.mjs && pnpm tauri icon src-tauri/icons/app-icon.png"
+  },
+  "devDependencies": {
+    "@hakobu/hakobu": "^1.0.1",
+    "@tauri-apps/cli": "^2.0.0",
+    "@tauri-apps/plugin-dialog": "^2.7.1",
+    "esbuild": "^0.28.0",
+    "sharp": "^0.33.0"
+  }
+}

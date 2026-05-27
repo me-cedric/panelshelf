@@ -1,0 +1,64 @@
+version: "3.8"
+
+services:
+  panelshelf:
+    build: .
+    container_name: panelshelf
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./data:/data          # SQLite database
+      - ./downloads:/downloads # Download storage
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - HOST=0.0.0.0
+      - LOG_LEVEL=info
+      - MAX_CONCURRENT_DOWNLOADS=3
+      # curl_cffi sidecar for lightweight Cloudflare bypass (TLS fingerprint impersonation)
+      - CURL_CFFI_URL=http://curl-cffi-sidecar:8192/fetch
+      # Optional: enable FlareSolverr to bypass Cloudflare on sites like zipcomic.com
+      # Uncomment the line below (or set via .env) to activate it.
+      # - FLARESOLVERR_URL=http://flaresolverr:8191/v1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # curl_cffi Sidecar — lightweight TLS fingerprint impersonation for
+  # Cloudflare-protected sites (e.g. zipcomic.com). This is the preferred
+  # bypass because it's fast and doesn't require a full browser.
+  # Enable by running `docker compose up -d curl-cffi-sidecar`
+  # and setting CURL_CFFI_URL=http://curl-cffi-sidecar:8192/fetch in the panelshelf service.
+  #
+  curl-cffi-sidecar:
+    build:
+      context: ./packages/backend/sidecar
+      dockerfile: Dockerfile
+    container_name: panelshelf-curl-cffi
+    ports:
+      - "8192:8192"
+    environment:
+      - LOG_LEVEL=info
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8192/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # FlareSolverr — optional headless-browser proxy for Cloudflare-protected sites.
+  # To enable: uncomment this block AND the FLARESOLVERR_URL env var above.
+  #
+  # flaresolverr:
+  #   image: ghcr.io/flaresolverr/flaresolverr:latest
+  #   container_name: flaresolverr
+  #   environment:
+  #     - LOG_LEVEL=info
+  #   ports:
+  #     - "8191:8191"   # Remove or comment out if you don't need host access
+  #   restart: unless-stopped

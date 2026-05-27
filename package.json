@@ -1,0 +1,24 @@
+{
+  "name": "panelshelf",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Self-hosted comic/book release metadata browser and download manager",
+  "scripts": {
+    "dev": "pnpm run db:migrate && concurrently -n api,web -c blue,green 'pnpm --filter @panelshelf/backend run dev' 'pnpm --filter @panelshelf/frontend run dev'",
+    "dev:desktop": "pnpm --filter @panelshelf/desktop run tauri:dev",
+    "build": "pnpm --filter @panelshelf/backend run build && pnpm --filter @panelshelf/frontend run build",
+    "build:desktop": "pnpm --filter @panelshelf/desktop run tauri:build",
+    "start": "pnpm --filter @panelshelf/backend run start",
+    "db:migrate": "pnpm --filter @panelshelf/backend run db:migrate",
+    "typecheck": "pnpm -r run typecheck"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["better-sqlite3", "esbuild", "@esbuild/linux-x64", "sharp"]
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
