@@ -37,6 +37,58 @@ PanelShelf aggregates comic book and graphic novel releases from multiple online
   <i>🖼️ Screenshots coming soon</i>
 </p>
 
+## 📑 Table of Contents
+
+<details open>
+  <summary><strong>Sections</strong></summary>
+
+  - [✨ Overview](#overview)
+  - [🚀 Features](#features)
+    - [Multi-Source Aggregation](#multi-source-aggregation)
+    - [Catalog & Search](#catalog--search)
+    - [Download Manager](#download-manager)
+    - [Cloudflare Bypass](#cloudflare-bypass)
+    - [Local Library & Comic Reader](#local-library--comic-reader)
+    - [Cross-Platform Desktop App](#cross-platform-desktop-app)
+    - [REST API](#rest-api)
+    - [UI/UX](#uiux)
+  - [🏗️ Architecture](#architecture)
+    - [Tech Stack](#tech-stack)
+    - [Project Structure](#project-structure)
+    - [In-Memory Caching](#in-memory-caching)
+  - [🏁 Quick Start](#quick-start)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
+    - [Docker Quick Start](#docker-quick-start)
+    - [First-Time Setup](#first-time-setup)
+    - [Configuration](#configuration)
+  - [📖 Comic Reader](#comic-reader)
+    - [Supported Formats](#supported-formats)
+    - [Keyboard Shortcuts](#keyboard-shortcuts)
+  - [🖥️ Desktop App](#desktop-app)
+    - [Architecture](#architecture)
+    - [Building](#building)
+    - [Platform Build Dependencies](#platform-build-dependencies)
+    - [Known Limitations](#known-limitations)
+  - [🐳 Docker Deployment](#docker-deployment)
+  - [💻 Development](#development)
+    - [Commands](#commands)
+    - [Adding a New Provider](#adding-a-new-provider)
+    - [curl_cffi Sidecar](#curl_cffi-sidecar)
+  - [📡 API](#api)
+    - [Endpoints](#endpoints)
+    - [Live Search Example](#live-search-example)
+  - [🧪 Testing](#testing)
+  - [🤝 Contributing](#contributing)
+    - [Bug Reports & Feature Requests](#bug-reports--feature-requests)
+    - [Pull Requests](#pull-requests)
+    - [Guidelines](#guidelines)
+    - [Development Setup](#development-setup)
+  - [🗺️ Roadmap](#roadmap)
+  - [📜 License](#license)
+  - [🙏 Acknowledgments](#acknowledgments)
+</details>
+
 ---
 
 ## ✨ Overview
@@ -63,6 +115,7 @@ PanelShelf solves a common problem for comic collectors: releases are scattered 
 - **Per-source refresh intervals** with rate limiting
 - **Dual catalog** — Persisted SQLite index (fast offline queries) + live search results from source sites
 
+<a id="catalog-search"></a>
 ### Catalog & Search
 
 - **Indexed catalog** — All ingested items stored in SQLite with full filtering and sorting
@@ -91,6 +144,7 @@ PanelShelf includes a multi-layer strategy for scraping Cloudflare-protected sit
 | **2. Playwright** | Full headless Chromium with stealth plugin | Fallback when curl_cffi fails |
 | **3. FlareSolverr** | Docker browser proxy (optional) | Last resort for stubborn sites |
 
+<a id="local-library-comic-reader"></a>
 ### Local Library & Comic Reader
 
 - **Add local folders** — Point PanelShelf at a directory of comics
@@ -551,6 +605,7 @@ pnpm --filter @panelshelf/frontend run typecheck
 
 Contributions are welcome! Here's how to help:
 
+<a id="bug-reports-feature-requests"></a>
 ### Bug Reports & Feature Requests
 
 - Open a [GitHub Issue](https://github.com/me-cedric/panelshelf/issues/new)
