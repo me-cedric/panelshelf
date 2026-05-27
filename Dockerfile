@@ -1,7 +1,7 @@
 # ── Build frontend ──
-FROM node:20-alpine AS frontend-builder
+FROM node:22-alpine AS frontend-builder
 WORKDIR /app
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@9 --activate
 
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY packages/frontend/package.json packages/frontend/package.json
@@ -13,9 +13,9 @@ COPY packages/frontend/ packages/frontend/
 RUN pnpm --filter @panelshelf/frontend run build
 
 # ── Build backend ──
-FROM node:20-alpine AS backend-builder
+FROM node:22-alpine AS backend-builder
 WORKDIR /app
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@9 --activate
 
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY packages/frontend/package.json packages/frontend/package.json
@@ -28,12 +28,12 @@ COPY packages/backend/ packages/backend/
 RUN pnpm --filter @panelshelf/backend run build
 
 # ── Runtime ──
-FROM node:20-alpine AS runtime
+FROM node:22-alpine AS runtime
 WORKDIR /app
 
 RUN apk add --no-cache dumb-init
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@9 --activate
 
 COPY --from=backend-builder /app/packages/backend/dist ./packages/backend/dist
 COPY --from=backend-builder /app/packages/backend/package.json ./packages/backend/package.json

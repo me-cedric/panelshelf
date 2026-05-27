@@ -1,83 +1,63 @@
 # PanelShelf v0.1.0
 
-**Self-hosted comic & graphic novel release browser, download manager, and local library reader.**
+Self-hosted comic & graphic novel release browser, download manager, and local library reader.
 
-This is the initial public release of PanelShelf. It aggregates comic book releases from multiple online sources, provides a searchable catalog, manages downloads, and includes a built-in comic reader for local files.
+## What's New
 
-## What's Included
+- **Multi-source aggregation** — RSS feeds, DCM, ZipComic, Internet Archive, GetComics
+- **Interactive catalog** — live search, infinite scroll, publisher/source/tag filters
+- **Download manager** — queue-based with redirect resolution and progress tracking
+- **Cloudflare bypass stack** — curl_cffi sidecar with stealth Playwright fallback
+- **Local library scanner** — auto-import CBZ/CBR files with metadata extraction
+- **Comic reader** — full-screen reader with keyboard shortcuts and page controls
+- **Desktop app** — Tauri v2 wrapper (macOS, Linux, Windows)
+- **OpenAPI docs** — auto-generated API reference at `/docs`
+- **Docker deployment** — single `docker compose up -d` to run everything
 
-This release includes pre-built artifacts for easy deployment:
+## Artifacts
 
-| Artifact | Description |
-|----------|-------------|
-| **Source code** (auto) | Tagged source at `v0.1.0` |
-| **Docker image** | `ghcr.io/me-cedric/panelshelf:v0.1.0` (via GitHub Actions) |
-| **panelshelf-v0.1.0.tar.gz** | Pre-built backend + frontend + deployment files |
-| **panelshelf-v0.1.0.zip** | Same as above in ZIP format |
+| File | Size | Description |
+|------|------|-------------|
+| `panelshelf-v0.1.0.tar.gz` | 23 MB | Pre-built backend + frontend archive |
+| `panelshelf-v0.1.0.zip` | 23 MB | Pre-built backend + frontend archive |
+| `ghcr.io/me-cedric/panelshelf:v0.1.0` | — | Docker image (multi-arch) |
 
 ## Quick Start
 
-### Using Docker (recommended)
+### Docker (recommended)
 
 ```bash
 docker compose up -d
 # Open http://localhost:3001
 ```
 
-The Docker Compose stack includes:
-- PanelShelf web app on port 3001
-- curl_cffi sidecar for Cloudflare bypass
-
-### Manual Setup
+### Manual
 
 ```bash
-# Requirements: Node.js >= 20, pnpm >= 9
-pnpm install --prod
+git clone https://github.com/me-cedric/panelshelf.git
+cd panelshelf
+pnpm install
 pnpm run db:migrate
-pnpm run start
-# Open http://localhost:3001
+pnpm run dev
+# Open http://localhost:5173
 ```
 
-### Extract the Pre-built Archive
+## Supported Sources
 
-```bash
-tar xzf panelshelf-v0.1.0.tar.gz
-cd panelshelf-v0.1.0
-# Install production dependencies only
-pnpm install --prod
-pnpm run db:migrate
-pnpm run start
-```
+| Source | Type | RSS | Search |
+|--------|------|-----|--------|
+| GetComics | Web scraping | — | ✅ |
+| DCM (Digital Comic Museum) | Structured | ✅ | ✅ |
+| ZipComic | Structured | ✅ | ✅ |
+| Internet Archive | Structured | — | ✅ |
+| Generic RSS/Atom | Feed parsing | ✅ | — |
 
-## Full Documentation
+## Known Limitations
 
-See the [README](https://github.com/me-cedric/panelshelf#readme) for complete documentation including:
-
-- [Architecture overview](https://github.com/me-cedric/panelshelf#-architecture)
-- [Feature list](https://github.com/me-cedric/panelshelf#-features)
-- [Configuration options](https://github.com/me-cedric/panelshelf#configuration)
-- [API reference](https://github.com/me-cedric/panelshelf#-api)
-- [Desktop app build guide](https://github.com/me-cedric/panelshelf#%EF%B8%8F-desktop-app)
-- [Contributing guidelines](https://github.com/me-cedric/panelshelf#-contributing)
+- Desktop app: Tauri build requires Rust toolchain (see README for per-platform instructions)
+- Internet Archive covers may be slow to load due to IA image server rate limits
+- Cloudflare bypass may require periodic captcha solving on first visit
 
 ## Changelog
 
 See [CHANGELOG.md](https://github.com/me-cedric/panelshelf/blob/main/CHANGELOG.md) for the full changelog.
-
-## Supported Sources
-
-| Source | Type |
-|--------|------|
-| GetComics | RSS-based |
-| Digital Comic Museum | Provider-based |
-| ZipComic | Provider-based (Cloudflare-aware) |
-| Internet Archive | Provider-based (official API) |
-| Any RSS/Atom feed | Auto-detected |
-| Any WordPress site | Auto-detected |
-
-## Known Limitations
-
-- Unit tests are not yet implemented (planned for v0.2.0)
-- Authentication is not yet implemented
-- PDF comic format support is planned
-- The `@yao-pkg/pkg` bundler may not fully support `better-sqlite3` native module
